@@ -3,9 +3,13 @@ import { Schema, model } from 'mongoose'
 const userSchema = new Schema(
   {
     username: {
-      type: String
+      type: String,
+      required: true
     },
-    password: String,
+    password: {
+      type: String,
+      required: true
+    },
     products: [
       {
         type: Schema.Types.ObjectId,

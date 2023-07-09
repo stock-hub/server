@@ -6,17 +6,48 @@ const invoiceSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Product'
     },
-    quantity: Number,
-    valuePerDay: Number,
-    totalValue: Number,
-    deposit: Number,
-    deliver: Date.now,
-    return: Date,
-    clientName: String,
-    clientAddress: String,
-    clientId: String,
+    quantity: {
+      type: Number,
+      required: true
+    },
+    valuePerDay: {
+      type: Number,
+      required: true
+    },
+    totalValue: {
+      type: Number,
+      required: true
+    },
+    deposit: {
+      type: Number,
+      required: true
+    },
+    deliver: {
+      type: Date,
+      default: Date.now,
+      required: true
+    },
+    return: {
+      type: Date,
+      required: true
+    },
+    clientName: {
+      type: String,
+      required: true
+    },
+    clientAddress: {
+      type: String,
+      required: true
+    },
+    clientId: {
+      type: String,
+      required: true
+    },
     clientTelephone: [Number],
-    signatureUrl: String
+    signatureUrl: {
+      type: String,
+      required: true
+    }
   },
   {
     timestamps: true
