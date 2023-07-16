@@ -5,7 +5,7 @@ import panelRoutes from './panel.routes'
 import CloudinaryRoutes from './cloud_images.routes'
 import productsRoutes from './product.routes'
 
-router.get('/', (req, res, next) => res.json('All good in here'))
+router.get('/', (_, res) => res.json('All good in here'))
 router.use('/admin', authRoutes)
 router.use('/panel', panelRoutes)
 router.use('/products', productsRoutes)
