@@ -1,6 +1,14 @@
 import { Schema, model } from 'mongoose'
 
-const userSchema = new Schema(
+export interface IUser {
+  _id?: string
+  username: string
+  password: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+const userSchema = new Schema<IUser>(
   {
     username: {
       type: String,
@@ -9,13 +17,7 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true
-    },
-    products: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Product'
-      }
-    ]
+    }
   },
   {
     timestamps: true
