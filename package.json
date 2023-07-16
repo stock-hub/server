@@ -10,7 +10,8 @@
     "dev": "nodemon --exec npx ts-node ./server.ts",
     "lint": "eslint **/*.ts",
     "format": "eslint **/*.ts --fix",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "seed": "npx ts-node seeds/products.seed.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.6",
