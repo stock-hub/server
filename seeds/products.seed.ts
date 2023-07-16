@@ -1,8 +1,8 @@
-require('dotenv').config()
-const mongoose = require('mongoose')
-const faker = require('faker')
-const Product = require('../models/Product.model')
-const User = require('../models/User.model')
+import 'dotenv/config'
+import mongoose from 'mongoose'
+import { faker } from '@faker-js/faker'
+import Product from '../models/Product.model'
+import User from '../models/User.model'
 const MONGO_URI = process.env.MONGODB_URI
 
 const connectToDB = async () => {
