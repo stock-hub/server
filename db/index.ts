@@ -1,12 +1,14 @@
-import mongoose, { Error } from 'mongoose'
+import mongoose from 'mongoose'
 
 const MONGO_URI: string = process.env.MONGODB_URI
 
 mongoose
   .connect(MONGO_URI)
   .then(res => {
-    console.log(`Connected to Mongo! Database name: "${res.connections[0].name}"`)
+    console.log(
+      `Connected to Mongo! Database name: "${res.connections[0].name}"`
+    )
   })
-  .catch((error: Error) => {
+  .catch(error => {
     console.error('Error connecting to mongo: ', error)
   })

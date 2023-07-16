@@ -1,11 +1,10 @@
-import { Request, Response, Router } from 'express'
+import { Request as ExpressRequest, Response, Router } from 'express'
+import { ParamsDictionary, Query } from 'express-serve-static-core'
 const router = Router()
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import isAuthenticated from '../middlewares/jwt.middleware'
 import User from './../models/User.model'
-import { Request as JWTRequest } from 'express-jwt'
-import { Error } from 'mongoose'
 const saltRounds = 10
 
 interface RequestBody {
@@ -13,67 +12,93 @@ interface RequestBody {
   password: string
 }
 
-router.post('/register', (req: Request, res: Response): void => {
+interface JwtPayload {
+  _id: string
+}
+
+interface Request
+  extends ExpressRequest<
+    ParamsDictionary,
+    any,
+    any,
+    Query,
+    Record<string, any>
+  > {
+  payload: JwtPayload
+}
+
+router.post('/register', async (req: Request, res: Response): Promise<void> => {
   const { password, username }: RequestBody = req.body
-  const salt = bcrypt.genSaltSync(saltRounds)
-  const hashedPassword = bcrypt.hashSync(password, salt)
 
   if (!password || !username) {
-    res
-      .status(400)
-      .json({ error: true, message: 'You must provide username and password' })
-
+    res.status(400).json({
+      error: true,
+      message: 'You must provide username and password'
+    })
     return
   }
 
-  User.create({ password: hashedPassword, username })
-    .then(createdUser => {
-      const { username, password, _id } = createdUser
-      const user = { username, password, _id }
-      res.status(201).json({ user })
+  try {
+    const salt = await bcrypt.genSalt(saltRounds)
+    const hashedPassword = await bcrypt.hash(password, salt)
+
+    const createdUser = await User.create({
+      password: hashedPassword,
+      username
     })
-    .catch((error: Error) => {
-      console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
-    })
+
+    const { username: userUsername, password: userPassword, _id } = createdUser
+    const user = { username: userUsername, password: userPassword, _id }
+
+    res.status(201).json({ user })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: true, message: 'Internal server error.' })
+  }
 })
 
-router.post('/login', (req: Request, res: Response) => {
+router.post('/login', async (req: Request, res: Response): Promise<void> => {
   const { username, password }: RequestBody = req.body
 
-  if (!password || !username) {
-    res
-      .status(401)
-      .json({ error: true, message: 'You must provide username and password' })
-
+  if (!username || !password) {
+    res.status(400).json({
+      error: true,
+      message: 'You must provide username and password'
+    })
     return
   }
 
-  User.findOne({ username })
-    .then(user => {
-      if (!user) {
-        res.status(401).json({ error: true, message: 'User not found.' })
-        return
-      } else if (bcrypt.compareSync(password, user.password)) {
-        const { username, _id } = user
-        const payload = { username, _id }
-        const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
-          algorithm: 'HS256',
-          expiresIn: '6h'
-        })
-        res.status(200).json({ authToken })
-      } else {
-        res.status(401).json({ message: 'User cannot be authenticated.' })
-      }
+  try {
+    const user = await User.findOne({ username })
+
+    if (!user) {
+      res.status(401).json({ error: true, message: 'User not found.' })
+      return
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password)
+
+    if (!validPassword) {
+      res.status(401).json({ error: true, message: 'Invalid password.' })
+      return
+    }
+
+    const { username: userUsername, _id } = user
+    const payload = { username: userUsername, _id }
+    const authToken = jwt.sign(payload, process.env.TOKEN_SECRET as string, {
+      algorithm: 'HS256',
+      expiresIn: '6h'
     })
-    .catch(err => {
-      console.log(err)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
-    })
+
+    res.status(200).json({ authToken })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: true, message: 'Internal server error.' })
+  }
 })
 
-router.get('/verify', isAuthenticated, (req: JWTRequest, res) => {
-  res.status(200).json(req.auth)
+router.get('/verify', isAuthenticated, (req: Request, res) => {
+  res.status(200).json(req.payload._id)
 })
 
-module.exports = router
+export default router

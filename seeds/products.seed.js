@@ -1,0 +1,74 @@
+require('dotenv').config()
+const mongoose = require('mongoose')
+const faker = require('faker')
+const Product = require('../models/Product.model')
+const User = require('../models/User.model')
+const MONGO_URI = process.env.MONGODB_URI
+
+const connectToDB = async () => {
+  try {
+    const x = await mongoose.connect(MONGO_URI)
+    const dbName = x.connections[0].name
+    console.log(`Connected to Mongo! Database name: "${dbName}"`)
+  } catch (err) {
+    console.error('Error connecting to mongo: ', err)
+  }
+}
+
+const adminId = process.env.ADMIN_ID
+const tags = ['machinery', 'tools', 'construction', 'hammer']
+
+const products = [
+  {
+    name: faker.commerce.productName(),
+    description: faker.lorem.words(15),
+    price: faker.finance.amount(1, 1000, 0),
+    imageUrl: [
+      'https://picsum.photos/200/300',
+      'https://picsum.photos/200/300',
+      'https://picsum.photos/200/300'
+    ],
+    tags: faker.helpers.arrayElement(tags),
+    onSell: faker.datatype.boolean()
+  },
+  {
+    name: faker.commerce.productName(),
+    description: faker.lorem.words(15),
+    price: faker.finance.amount(1, 1000, 0),
+    imageUrl: [
+      'https://picsum.photos/200/300',
+      'https://picsum.photos/200/300',
+      'https://picsum.photos/200/300'
+    ],
+    tags: faker.helpers.arrayElement(tags),
+    onSell: faker.datatype.boolean()
+  }
+]
+
+const seedDB = async () => {
+  try {
+    const productsFromDB = await Product.create(products)
+    console.log(`Created ${productsFromDB.length} products`)
+    const objId = productsFromDB.map(product => product._id)
+
+    await User.findByIdAndUpdate(
+      adminId,
+      { $push: { products: objId } },
+      { new: true }
+    )
+
+    console.log('Finished updating user with product IDs')
+    await mongoose.connection.close()
+  } catch (err) {
+    console.error(
+      `An error occurred while creating products from the DB: ${err}`
+    )
+  }
+}
+
+const run = async () => {
+  await connectToDB()
+  await seedDB()
+}
+
+run()
