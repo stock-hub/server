@@ -2,7 +2,6 @@ import { Request as ExpressRequest, Response, Router } from 'express'
 const router = Router()
 import { v2 as cloudinary } from 'cloudinary'
 import Product from '../models/Product.model'
-import User from '../models/User.model'
 import isAuthenticated from '../middlewares/jwt.middleware'
 import { ParamsDictionary, Query } from 'express-serve-static-core'
 
@@ -35,16 +34,24 @@ router.get(
   isAuthenticated,
   async (req: Request, res: Response): Promise<void> => {
     const { page: pageParam } = req.params
+    const userId = req.payload._id
     const page = +pageParam
     const limit = 10
     const skip = (page - 1) * limit
 
     try {
-      const totalProducts = await Product.countDocuments()
+      const totalProducts = await Product.countDocuments({ user: userId })
       const totalPages = Math.ceil(totalProducts / limit)
 
-      const products = await Product.find()
-        .sort({ _id: -1 })
+      if (page > totalPages) {
+        res
+          .status(400)
+          .json({ error: true, message: `You have exceed the maximum page.` })
+        return
+      }
+
+      const products = await Product.find({ user: userId })
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
 
@@ -63,9 +70,11 @@ router.get(
   isAuthenticated,
   async (req: Request, res: Response): Promise<void> => {
     const { search_query } = req.params
+    const userId = req.payload._id
 
     try {
       const products = await Product.find({
+        user: userId,
         name: { $regex: search_query, $options: 'i' }
       })
 
@@ -86,22 +95,17 @@ router.post(
     const userId = req.payload._id
 
     try {
-      const product = await Product.create({
+      await Product.create({
         name,
         description,
         price,
         tags,
         onSell: onSell === 'on',
-        imageUrl
+        imageUrl,
+        user: userId
       })
 
-      await User.findByIdAndUpdate(
-        userId,
-        { $push: { products: product._id } },
-        { new: true }
-      )
-
-      res.json({ message: 'Product successfully created.' })
+      res.status(201).json({ message: 'Product successfully created.' })
     } catch (err) {
       console.error(err)
       res.status(500).json({ error: true, message: 'Internal server error.' })
@@ -116,9 +120,35 @@ router.get(
     const { productId } = req.params
 
     try {
-      const product = await Product.findById(productId)
+      const product = await Product.findById(productId).populate('user')
 
       res.status(200).json(product)
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: true, message: 'Internal server error.' })
+    }
+  }
+)
+
+router.put(
+  '/:productId/edit',
+  isAuthenticated,
+  async (req: Request, res: Response): Promise<void> => {
+    const { name, description, price, tags, onSell, imageUrl }: RequestBody =
+      req.body
+    const { productId } = req.params
+
+    try {
+      await Product.findByIdAndUpdate(productId, {
+        name,
+        description,
+        price,
+        tags,
+        onSell,
+        imageUrl
+      })
+
+      res.status(200).json({ message: 'Product successfully updated.' })
     } catch (error) {
       console.error(error)
       res.status(500).json({ error: true, message: 'Internal server error.' })
