@@ -1,4 +1,23 @@
 import { Schema, model } from 'mongoose'
+import { IProduct } from './Product.model'
+
+export interface IInvoice {
+  _id?: string
+  product: IProduct
+  quantity: number
+  valuePerDay: number
+  totalValue: number
+  deposit: number
+  deliver: Date
+  return: Date
+  clientName: string
+  clientAddress: string
+  clientId: string
+  clientTelephone: number[]
+  signatureUrl: string
+  createdAt: Date
+  updatedAt: Date
+}
 
 const invoiceSchema = new Schema(
   {
