@@ -5,7 +5,6 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import isAuthenticated from '../middlewares/jwt.middleware'
 import User from './../models/User.model'
-const saltRounds = 10
 
 interface RequestBody {
   username: string
@@ -29,6 +28,7 @@ interface Request
 
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
   const { password, username }: RequestBody = req.body
+  const saltRounds = 10
 
   if (!password || !username) {
     res.status(400).json({
@@ -42,15 +42,12 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     const salt = await bcrypt.genSalt(saltRounds)
     const hashedPassword = await bcrypt.hash(password, salt)
 
-    const createdUser = await User.create({
+    const { _id } = await User.create({
       password: hashedPassword,
       username
     })
 
-    const { username: userUsername, password: userPassword, _id } = createdUser
-    const user = { username: userUsername, password: userPassword, _id }
-
-    res.status(201).json({ user })
+    res.status(201).json({ message: 'User successfully created', _id })
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: true, message: 'Internal server error.' })
@@ -83,8 +80,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    const { username: userUsername, _id } = user
-    const payload = { username: userUsername, _id }
+    const payload = { username: user.username, _id: user._id }
     const authToken = jwt.sign(payload, process.env.TOKEN_SECRET as string, {
       algorithm: 'HS256',
       expiresIn: '6h'

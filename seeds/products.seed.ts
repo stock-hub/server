@@ -1,46 +1,47 @@
 import 'dotenv/config'
 import mongoose from 'mongoose'
 import { faker } from '@faker-js/faker'
-import Product from '../models/Product.model'
+import Product, { IProduct } from '../models/Product.model'
+
+type seedProduct = Omit<IProduct, '_id' | 'createdAt' | 'updatedAt'>
+
 const MONGO_URI = process.env.MONGODB_URI
+const ADMIN_ID = process.env.ADMIN_ID
+const TAGS = ['machinery', 'tools', 'construction', 'hammer']
+const ARRAY_ELEMENTS = 8
 
 const connectToDB = async () => {
   try {
-    const x = await mongoose.connect(MONGO_URI)
-    const dbName = x.connections[0].name
-    console.log(`Connected to Mongo! Database name: "${dbName}"`)
-  } catch (err) {
-    console.error('Error connecting to mongo: ', err)
+    const { connections } = await mongoose.connect(MONGO_URI)
+    console.log(`Connected to Mongo! Database name: "${connections[0].name}"`)
+  } catch (error) {
+    console.error('Error connecting to mongo: ', error)
   }
 }
 
-const adminId = process.env.ADMIN_ID
-const tags = ['machinery', 'tools', 'construction', 'hammer']
-const arrayElements = 4
-
-const products = Array(arrayElements).fill({
+const generateProduct = (): seedProduct => ({
   name: faker.commerce.productName(),
   description: faker.lorem.words(15),
-  price: faker.finance.amount(1, 1000, 0),
-  imageUrl: [
-    'https://picsum.photos/200/300',
-    'https://picsum.photos/200/300',
-    'https://picsum.photos/200/300'
-  ],
-  tags: faker.helpers.arrayElement(tags),
+  price: parseFloat(faker.finance.amount({ min: 1, max: 1000, dec: 0 })),
+  imageUrl: Array.from({ length: 6 }, () => faker.image.url()),
+  tags: faker.helpers.arrayElements(TAGS, 2),
   onSell: faker.datatype.boolean(),
-  user: adminId
+  user: ADMIN_ID as any
 })
 
 const seedDB = async () => {
   try {
+    const products: seedProduct[] = Array.from(
+      { length: ARRAY_ELEMENTS },
+      generateProduct
+    )
     const productsFromDB = await Product.create(products)
     console.log(`Created ${productsFromDB.length} products`)
-
     await mongoose.connection.close()
-  } catch (err) {
+  } catch (error) {
     console.error(
-      `An error occurred while creating products from the DB: ${err}`
+      'An error occurred while creating products from the DB: ',
+      error
     )
   }
 }

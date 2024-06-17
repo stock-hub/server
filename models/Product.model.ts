@@ -10,8 +10,8 @@ export interface IProduct {
   tags: string[]
   onSell: boolean
   user: IUser
-  createdAt: Date
-  updatedAt: Date
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 const productSchema = new Schema<IProduct>(
@@ -30,7 +30,8 @@ const productSchema = new Schema<IProduct>(
     },
     imageUrl: {
       type: [String],
-      required: true
+      required: true,
+      maxlength: 5
     },
     tags: {
       type: [String],
