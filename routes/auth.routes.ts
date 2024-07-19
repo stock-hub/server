@@ -93,8 +93,31 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
   }
 })
 
+router.get(
+  '/user',
+  isAuthenticated,
+  async (req: Request, res: Response): Promise<void> => {
+    const { _id } = req.payload
+    try {
+      const user = await User.findById(_id)
+
+      if (!user) {
+        res.status(401).json({ error: true, message: 'User not found.' })
+        return
+      }
+
+      const payload = { username: user.username, _id: user._id }
+
+      res.status(200).json({ data: payload })
+    } catch (err) {
+      console.error(err)
+      res.status(500).json({ error: true, message: err })
+    }
+  }
+)
+
 router.get('/verify', isAuthenticated, (req: Request, res) => {
-  res.status(200).json(req.payload._id)
+  res.status(204).json()
 })
 
 export default router
