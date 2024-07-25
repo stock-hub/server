@@ -1,9 +1,9 @@
-import { Request as ExpressRequest, Response, Router } from 'express'
+import { Response, Router } from 'express'
 const router = Router()
 import { v2 as cloudinary } from 'cloudinary'
 import Product from '../models/Product.model'
 import isAuthenticated from '../middlewares/jwt.middleware'
-import { ParamsDictionary, Query } from 'express-serve-static-core'
+import { Request } from '../types'
 
 interface RequestBody {
   name: string
@@ -12,21 +12,6 @@ interface RequestBody {
   tags: string[]
   onSell: string
   imageUrl: string
-}
-
-interface JwtPayload {
-  _id: string
-}
-
-interface Request
-  extends ExpressRequest<
-    ParamsDictionary,
-    any,
-    any,
-    Query,
-    Record<string, any>
-  > {
-  payload: JwtPayload
 }
 
 router.get(

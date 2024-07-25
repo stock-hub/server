@@ -1,29 +1,14 @@
-import { Request as ExpressRequest, Response, Router } from 'express'
-import { ParamsDictionary, Query } from 'express-serve-static-core'
+import { Response, Router } from 'express'
 const router = Router()
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import isAuthenticated from '../middlewares/jwt.middleware'
-import User from './../models/User.model'
+import User from '../models/User.model'
+import { Request } from '../types'
 
 interface RequestBody {
   username: string
   password: string
-}
-
-interface JwtPayload {
-  _id: string
-}
-
-interface Request
-  extends ExpressRequest<
-    ParamsDictionary,
-    any,
-    any,
-    Query,
-    Record<string, any>
-  > {
-  payload: JwtPayload
 }
 
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
