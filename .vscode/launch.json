@@ -4,15 +4,23 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Server",
-      "runtimeExecutable": "npx",
+      "name": "Debug TS Node with Nodemon",
+      "runtimeExecutable": "nodemon",
+      "program": "${workspaceFolder}/src/server.ts",
+      "restart": true,
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
       "runtimeArgs": [
-        "ts-node"
+        "--exec",
+        "npx ts-node"
       ],
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "server.ts"
+      "env": {
+        "NODE_ENV": "development"
+      }
     }
   ]
 }
