@@ -11,6 +11,7 @@ interface RequestBody {
   price: number
   tags: string[]
   onSell: string
+  inStock: string
   imageUrl: string
 }
 
@@ -75,8 +76,15 @@ router.post(
   '/new',
   isAuthenticated,
   async (req: Request, res: Response): Promise<void> => {
-    const { name, description, price, tags, onSell, imageUrl }: RequestBody =
-      req.body
+    const {
+      name,
+      description,
+      price,
+      tags,
+      onSell,
+      inStock,
+      imageUrl
+    }: RequestBody = req.body
     const userId = req.payload._id
 
     try {
@@ -86,6 +94,7 @@ router.post(
         price,
         tags,
         onSell: onSell === 'on',
+        inStock: inStock === 'on',
         imageUrl,
         user: userId
       })
@@ -119,8 +128,15 @@ router.put(
   '/:productId/edit',
   isAuthenticated,
   async (req: Request, res: Response): Promise<void> => {
-    const { name, description, price, tags, onSell, imageUrl }: RequestBody =
-      req.body
+    const {
+      name,
+      description,
+      price,
+      tags,
+      onSell,
+      inStock,
+      imageUrl
+    }: RequestBody = req.body
     const { productId } = req.params
 
     try {
@@ -130,6 +146,7 @@ router.put(
         price,
         tags,
         onSell,
+        inStock,
         imageUrl
       })
 

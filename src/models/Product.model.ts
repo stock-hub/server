@@ -9,6 +9,7 @@ export interface IProduct {
   imageUrl: string[]
   tags: string[]
   onSell: boolean
+  inStock: boolean
   user: IUser
   createdAt?: Date
   updatedAt?: Date
@@ -39,7 +40,13 @@ const productSchema = new Schema<IProduct>(
     },
     onSell: {
       type: Boolean,
-      default: false
+      default: false,
+      required: true
+    },
+    inStock: {
+      type: Boolean,
+      default: false,
+      required: true
     },
     user: {
       type: Schema.Types.ObjectId,

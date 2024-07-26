@@ -23,9 +23,10 @@ const generateProduct = (): seedProduct => ({
   name: faker.commerce.productName(),
   description: faker.lorem.words(15),
   price: parseFloat(faker.finance.amount({ min: 1, max: 1000, dec: 0 })),
-  imageUrl: Array.from({ length: 6 }, () => faker.image.url()),
+  imageUrl: Array.from({ length: 5 }, () => faker.image.url()),
   tags: faker.helpers.arrayElements(TAGS, 2),
   onSell: faker.datatype.boolean(),
+  inStock: faker.datatype.boolean(),
   user: ADMIN_ID as any
 })
 

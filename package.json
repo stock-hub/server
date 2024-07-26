@@ -13,7 +13,7 @@
     "lint": "eslint **/*.ts",
     "format": "eslint **/*.ts --fix",
     "prepare": "husky install",
-    "seed": "npx ts-node seeds/products.seed.ts"
+    "seed": "npx ts-node ./src/seeds/products.seed.ts"
   },
   "engines": {
     "node": "16.x"

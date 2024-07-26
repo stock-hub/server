@@ -4,6 +4,12 @@ export interface IUser {
   _id?: string
   username: string
   password: string
+  logoUrl: string
+  companyName: string
+  phone: number
+  address: string
+  nif: string
+  tags: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -17,6 +23,30 @@ const userSchema = new Schema<IUser>(
     password: {
       type: String,
       required: true
+    },
+    logoUrl: {
+      type: String,
+      required: false
+    },
+    companyName: {
+      type: String,
+      required: false
+    },
+    phone: {
+      type: Number,
+      required: false
+    },
+    address: {
+      type: String,
+      required: false
+    },
+    nif: {
+      type: String,
+      required: false
+    },
+    tags: {
+      type: [String],
+      required: false
     }
   },
   {
