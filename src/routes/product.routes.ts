@@ -15,11 +15,17 @@ interface RequestBody {
   imageUrl: string
 }
 
+interface SearchFilter {
+  query?: string
+  tags?: string
+}
+
 router.get(
   '/:page',
   isAuthenticated,
   async (req: Request, res: Response): Promise<void> => {
     const { page: pageParam } = req.params
+    const { query, tags }: SearchFilter = req.query
     const userId = req.payload._id
     const page = +pageParam
     const limit = 10
@@ -28,6 +34,17 @@ router.get(
     try {
       const totalProducts = await Product.countDocuments({ user: userId })
       const totalPages = Math.ceil(totalProducts / limit)
+      const searchCondition = { user: userId }
+
+      if (query) {
+        searchCondition['name'] = { $regex: query, $options: 'i' }
+      }
+
+      if (tags) {
+        const tagsArray = tags.split(',').map(tag => tag.trim())
+
+        searchCondition['tags'] = { $in: tagsArray }
+      }
 
       if (page > totalPages) {
         res
@@ -36,7 +53,7 @@ router.get(
         return
       }
 
-      const products = await Product.find({ user: userId })
+      const products = await Product.find(searchCondition)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)

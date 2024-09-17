@@ -14,6 +14,8 @@ export interface IUser {
   updatedAt: Date
 }
 
+const tagsSize = (value: string[]) => value.length <= 10
+
 const userSchema = new Schema<IUser>(
   {
     username: {
@@ -46,7 +48,8 @@ const userSchema = new Schema<IUser>(
     },
     tags: {
       type: [String],
-      required: false
+      required: false,
+      validate: [tagsSize, '{PATH} exceeds the limit of 10']
     }
   },
   {

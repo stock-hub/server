@@ -91,9 +91,13 @@ router.get(
         return
       }
 
-      const payload = { username: user.username, _id: user._id }
+      const payload = {
+        username: user.username,
+        _id: user._id,
+        tags: user.tags
+      }
 
-      res.status(200).json({ data: payload })
+      res.status(200).json(payload)
     } catch (err) {
       console.error(err)
       res.status(500).json({ error: true, message: err })

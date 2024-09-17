@@ -34,7 +34,9 @@ router.post(
         body: buffer
       })
 
-      res.status(200).json({ file: result })
+      res.status(200).json({
+        file: { status: result.$metadata.httpStatusCode, filename: fileId }
+      })
     } catch (error) {
       console.error(error)
       res.status(500).json({ error: true, message: 'Internal server error.' })
@@ -50,7 +52,7 @@ router.get(
       const { filename } = req.params
       const { _id } = req.payload
 
-      const result = await s3StorageService.download(`${_id}/${filename}`)
+      const result = await s3StorageService.download(`${_id}/${filename}.pdf`)
 
       if (result.Body instanceof Readable) {
         res.setHeader(
@@ -59,7 +61,7 @@ router.get(
         )
         res.setHeader(
           'Content-Disposition',
-          `attachment; filename="${filename}"`
+          `attachment; filename="${filename}.pdf"`
         )
 
         await pipelineAsync(result.Body, res)
@@ -85,9 +87,9 @@ router.delete(
       const { filename } = req.params
       const { _id } = req.payload
 
-      const result = await s3StorageService.deleteItem(`${_id}/${filename}.pdf`)
+      await s3StorageService.deleteItem(`${_id}/${filename}.pdf`)
 
-      res.status(200).json({ message: 'File deleted successfully', result })
+      res.status(200).json({ message: 'File deleted successfully' })
     } catch (error) {
       console.error('Error deleting file:', error)
       res
