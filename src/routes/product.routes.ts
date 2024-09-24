@@ -1,7 +1,7 @@
 import { Response, Router } from 'express'
 const router = Router()
 import { v2 as cloudinary } from 'cloudinary'
-import Product from '../models/Product.model'
+import Product, { IProduct } from '../models/Product.model'
 import isAuthenticated from '../middlewares/jwt.middleware'
 import { Request } from '../types'
 
@@ -101,7 +101,7 @@ router.post(
       onSell,
       inStock,
       imageUrl
-    }: RequestBody = req.body
+    }: Partial<IProduct> = req.body
     const userId = req.payload._id
 
     try {
@@ -110,8 +110,8 @@ router.post(
         description,
         price,
         tags,
-        onSell: onSell === 'on',
-        inStock: inStock === 'on',
+        onSell: String(onSell) === 'on',
+        inStock: String(inStock) === 'on',
         imageUrl,
         user: userId
       })

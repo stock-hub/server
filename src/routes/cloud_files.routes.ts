@@ -2,16 +2,15 @@ import { Response, Router } from 'express'
 import multer from 'multer'
 import { Readable, pipeline } from 'stream'
 import { promisify } from 'util'
-import { randomUUID } from 'crypto'
 import { Request } from '../types'
-const router = Router()
 import isAuthenticated from '../middlewares/jwt.middleware'
 import { S3StorageService } from '../services/s3.service'
 
+const router = Router()
 const uploader = multer({ storage: multer.memoryStorage() })
 const s3StorageService = new S3StorageService()
 const pipelineAsync = promisify(pipeline)
-const fileId = randomUUID().split('-').join('')
+// const fileId = randomUUID().split('-').join('')
 
 router.post(
   '/upload_file',
@@ -27,6 +26,7 @@ router.post(
 
     try {
       const { buffer } = req.file
+      const { fileId } = req.body
       const { _id } = req.payload
 
       const result = await s3StorageService.upload({
