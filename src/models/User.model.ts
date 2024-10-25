@@ -3,15 +3,16 @@ import { Schema, model } from 'mongoose'
 export interface IUser {
   _id?: string
   username: string
-  password: string
+  password?: string
   logoUrl: string
   companyName: string
+  companyDescription: string
   phone: number
   address: string
   nif: string
   tags: string[]
-  createdAt: Date
-  updatedAt: Date
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 const tagsSize = (value: string[]) => value.length <= 10
@@ -31,6 +32,10 @@ const userSchema = new Schema<IUser>(
       required: false
     },
     companyName: {
+      type: String,
+      required: false
+    },
+    companyDescription: {
       type: String,
       required: false
     },

@@ -1,7 +1,8 @@
 import { Response, Router } from 'express'
 import isAuthenticated from '../middlewares/jwt.middleware'
-import { Request } from '../types'
+import ClientModel from '../models/Client.model'
 import Invoice, { IInvoice } from '../models/Invoice.model'
+import { Request } from '../types'
 
 interface SearchFilter {
   query?: string
@@ -15,37 +16,54 @@ router.post(
   isAuthenticated,
   async (req: Request, res: Response): Promise<void> => {
     const {
-      product,
-      quantity,
-      valuePerDay,
+      products,
       totalValue,
-      deposit,
       deliver,
-      return: returnDate,
       clientName,
       clientAddress,
       clientId,
       clientTelephone,
-      fileId
+      invoiceId
     }: Partial<IInvoice> = req.body
     const userId = req.payload._id
 
     try {
-      await Invoice.create({
+      const invoice = await Invoice.create({
         user: userId,
-        product,
-        quantity,
-        valuePerDay,
+        products,
         totalValue,
-        deposit,
         deliver,
-        return: returnDate,
         clientName,
         clientAddress,
         clientId,
         clientTelephone,
-        fileId
+        invoiceId
       })
+
+      const client = await ClientModel.findOne({ dni: clientId })
+      const rentedProducts = products
+        .filter(product => product.return)
+        .map(products => products.product)
+      const boughtProducts = products
+        .filter(product => !product.return)
+        .map(products => products.product)
+
+      if (!client) {
+        const newClient = await ClientModel.create({
+          name: clientName,
+          address: clientAddress,
+          dni: clientId,
+          phone: clientTelephone
+        })
+
+        await ClientModel.findByIdAndUpdate(newClient._id, {
+          $push: { invoices: invoice._id, rentedProducts, boughtProducts }
+        })
+      } else {
+        await ClientModel.findByIdAndUpdate(client._id, {
+          $push: { invoices: invoice._id, rentedProducts, boughtProducts }
+        })
+      }
 
       res.status(201).json({ message: 'Invoice successfully created.' })
     } catch (error) {
@@ -86,7 +104,7 @@ router.get(
       }
 
       const invoices = await Invoice.find(searchCondition)
-        .populate('product')
+        .populate('products.product')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -108,7 +126,9 @@ router.get(
     const { invoiceId } = req.params
 
     try {
-      const invoice = await Invoice.findById(invoiceId).populate('product')
+      const invoice = await Invoice.findById(invoiceId).populate([
+        { path: 'products.product' }
+      ])
 
       res.status(200).json(invoice)
     } catch (error) {

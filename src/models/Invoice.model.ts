@@ -2,21 +2,27 @@ import { Schema, model } from 'mongoose'
 import { IProduct } from './Product.model'
 import { IUser } from './User.model'
 
+export interface InvoiceProduct {
+  product: IProduct
+  name: string
+  quantity: string
+  deposit?: number
+  valuePerDay?: number
+  return?: Date
+}
+
 export interface IInvoice {
   _id?: string
   user: IUser
-  product: IProduct | string
-  quantity: number
-  valuePerDay?: number
+  products: InvoiceProduct[]
   totalValue: number
-  deposit?: number
   deliver: Date
-  return?: Date
   clientName: string
   clientAddress: string
   clientId: string
   clientTelephone: number
-  fileId: string
+  clientSignature?: string
+  invoiceId: string
   createdAt: Date
   updatedAt: Date
 }
@@ -27,30 +33,39 @@ const invoiceSchema = new Schema<IInvoice>(
       type: Schema.Types.ObjectId,
       ref: 'User'
     },
-    product: {
-      type: String
-    },
-    quantity: {
-      type: Number,
-      required: true
-    },
-    valuePerDay: {
-      type: Number
-    },
-    totalValue: {
-      type: Number,
-      required: true
-    },
-    deposit: {
-      type: Number
-    },
+    products: [
+      {
+        product: {
+          type: Schema.Types.ObjectId,
+          ref: 'Product'
+        },
+        name: {
+          type: String,
+          required: true
+        },
+        quantity: {
+          type: Number,
+          required: true
+        },
+        valuePerDay: {
+          type: Number
+        },
+        deposit: {
+          type: Number
+        },
+        return: {
+          type: Date
+        }
+      }
+    ],
     deliver: {
       type: Date,
       default: Date.now,
       required: true
     },
-    return: {
-      type: Date
+    totalValue: {
+      type: Number,
+      required: true
     },
     clientName: {
       type: String,
@@ -67,7 +82,10 @@ const invoiceSchema = new Schema<IInvoice>(
     clientTelephone: {
       type: Number
     },
-    fileId: {
+    clientSignature: {
+      type: String
+    },
+    invoiceId: {
       type: String,
       required: true
     }

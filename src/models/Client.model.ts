@@ -2,13 +2,13 @@ import { Schema, model } from 'mongoose'
 import { IProduct } from './Product.model'
 import { IInvoice } from './Invoice.model'
 
-export interface IUser {
+export interface Client {
   _id?: string
   name: string
   address: string
   dni: string
-  phone: string
-  imgUrl: string
+  phone: number
+  imgUrl?: string
   boughtProducts: IProduct[]
   rentedProducts: IProduct[]
   invoices: IInvoice[]
@@ -16,7 +16,7 @@ export interface IUser {
   updatedAt: Date
 }
 
-const userSchema = new Schema<IUser>(
+const clientSchema = new Schema<Client>(
   {
     name: {
       type: String,
@@ -31,12 +31,12 @@ const userSchema = new Schema<IUser>(
       required: true
     },
     phone: {
-      type: String,
+      type: Number,
       required: true
     },
     imgUrl: {
       type: String,
-      required: true
+      required: false
     },
     boughtProducts: [
       {
@@ -62,4 +62,4 @@ const userSchema = new Schema<IUser>(
   }
 )
 
-export default model('User', userSchema)
+export default model('Client', clientSchema)
