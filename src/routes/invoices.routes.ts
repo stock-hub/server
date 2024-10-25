@@ -3,6 +3,7 @@ import isAuthenticated from '../middlewares/jwt.middleware'
 import ClientModel from '../models/Client.model'
 import Invoice, { IInvoice } from '../models/Invoice.model'
 import { Request } from '../types'
+import SignatureModel from '../models/Signature.model'
 
 interface SearchFilter {
   query?: string
@@ -65,7 +66,9 @@ router.post(
         })
       }
 
-      res.status(201).json({ message: 'Invoice successfully created.' })
+      const newInvoice = await invoice.populate('products.product')
+
+      res.status(201).json(newInvoice)
     } catch (error) {
       console.error(error)
       res.status(500).json({ error: true, message: 'Internal server error.' })
@@ -137,4 +140,62 @@ router.get(
     }
   }
 )
+
+router.post(
+  '/:invoiceId/sign',
+  async (req: Request, res: Response): Promise<void> => {
+    const { invoiceId } = req.params
+    const { signature } = req.body
+
+    try {
+      await SignatureModel.create({ invoiceId, signature })
+
+      res.status(204).json()
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: true, message: 'Internal server error.' })
+    }
+  }
+)
+
+router.get(
+  '/:invoiceId/sign/view',
+  async (req: Request, res: Response): Promise<void> => {
+    const { invoiceId } = req.params
+    try {
+      const { signature } = await SignatureModel.findOne({ invoiceId })
+
+      res.status(200).json({ signature })
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: true, message: 'Internal server error.' })
+    }
+  }
+)
+
+router.delete(
+  '/:invoiceId/delete',
+  isAuthenticated,
+  async (req: Request, res: Response): Promise<void> => {
+    const { invoiceId } = req.params
+
+    try {
+      const invoice = await Invoice.findOneAndDelete({ invoiceId })
+      await ClientModel.findOneAndUpdate(
+        { dni: (invoice as unknown as IInvoice).clientId },
+        {
+          $pull: {
+            invoices: (invoice as unknown as IInvoice)._id
+          }
+        }
+      )
+
+      res.status(204).json()
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: true, message: 'Internal server error.' })
+    }
+  }
+)
+
 export default router

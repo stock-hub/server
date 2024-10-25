@@ -10,7 +10,6 @@ const router = Router()
 const uploader = multer({ storage: multer.memoryStorage() })
 const s3StorageService = new S3StorageService()
 const pipelineAsync = promisify(pipeline)
-// const fileId = randomUUID().split('-').join('')
 
 router.post(
   '/upload_file',
