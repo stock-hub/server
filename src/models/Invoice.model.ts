@@ -17,9 +17,11 @@ export interface IInvoice {
   products: InvoiceProduct[]
   totalValue: number
   deliver: Date
+  termsAccepted: boolean
   clientName: string
   clientAddress: string
   clientId: string
+  clientEmail: string
   clientTelephone: number
   clientSignature?: string
   invoiceId: string
@@ -67,6 +69,11 @@ const invoiceSchema = new Schema<IInvoice>(
       type: Number,
       required: true
     },
+    termsAccepted: {
+      type: Boolean,
+      default: true,
+      required: true
+    },
     clientName: {
       type: String,
       required: true
@@ -76,6 +83,10 @@ const invoiceSchema = new Schema<IInvoice>(
       required: true
     },
     clientId: {
+      type: String,
+      required: true
+    },
+    clientEmail: {
       type: String,
       required: true
     },

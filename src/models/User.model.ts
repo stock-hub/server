@@ -11,6 +11,8 @@ export interface IUser {
   address: string
   nif: string
   tags: string[]
+  invoiceTermsAndConditions?: string
+  additionalData?: Record<string, any>
   createdAt?: Date
   updatedAt?: Date
 }
@@ -55,6 +57,14 @@ const userSchema = new Schema<IUser>(
       type: [String],
       required: false,
       validate: [tagsSize, '{PATH} exceeds the limit of 10']
+    },
+    invoiceTermsAndConditions: {
+      type: String,
+      required: false
+    },
+    additionalData: {
+      type: Object,
+      required: false
     }
   },
   {

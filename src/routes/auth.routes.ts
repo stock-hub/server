@@ -152,7 +152,9 @@ router.get(
         phone: user.phone,
         address: user.address,
         nif: user.nif,
-        tags: user.tags
+        tags: user.tags,
+        invoiceTermsAndConditions: user.invoiceTermsAndConditions,
+        additionalData: user.additionalData
       }
 
       res.status(200).json(payload)

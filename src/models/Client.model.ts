@@ -8,6 +8,7 @@ export interface Client {
   address: string
   dni: string
   phone: number
+  email: string
   imgUrl?: string
   boughtProducts: IProduct[]
   rentedProducts: IProduct[]
@@ -37,6 +38,10 @@ const clientSchema = new Schema<Client>(
     imgUrl: {
       type: String,
       required: false
+    },
+    email: {
+      type: String,
+      required: true
     },
     boughtProducts: [
       {

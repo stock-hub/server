@@ -23,6 +23,7 @@ router.post(
       clientName,
       clientAddress,
       clientId,
+      clientEmail,
       clientTelephone,
       invoiceId
     }: Partial<IInvoice> = req.body
@@ -37,6 +38,7 @@ router.post(
         clientName,
         clientAddress,
         clientId,
+        clientEmail,
         clientTelephone,
         invoiceId
       })
@@ -130,7 +132,8 @@ router.get(
 
     try {
       const invoice = await Invoice.findById(invoiceId).populate([
-        { path: 'products.product' }
+        { path: 'products.product' },
+        { path: 'user' }
       ])
 
       res.status(200).json(invoice)
