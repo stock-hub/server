@@ -10,6 +10,7 @@ export interface IUser {
   phone: number
   address: string
   nif: string
+  email: string
   tags: string[]
   invoiceTermsAndConditions?: string
   additionalData?: Record<string, any>
@@ -52,6 +53,10 @@ const userSchema = new Schema<IUser>(
     nif: {
       type: String,
       required: false
+    },
+    email: {
+      type: String,
+      required: true
     },
     tags: {
       type: [String],
