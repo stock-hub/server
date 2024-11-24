@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose'
-import { IUser } from './User.model'
+import { User } from './User.model'
 
-export interface IProduct {
+export interface Product {
   _id?: string
   name: string
   description: string
@@ -10,12 +10,12 @@ export interface IProduct {
   tags: string[]
   onSell: boolean
   inStock: boolean
-  user: IUser
+  user: User
   createdAt?: Date
   updatedAt?: Date
 }
 
-const productSchema = new Schema<IProduct>(
+const productSchema = new Schema<Product>(
   {
     name: {
       type: String,

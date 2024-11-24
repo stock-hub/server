@@ -1,13 +1,13 @@
-import { Response, Router } from 'express'
-const router = Router()
 import bcrypt from 'bcryptjs'
+import { Response, Router } from 'express'
 import jwt from 'jsonwebtoken'
 import randomstring from 'randomstring'
-import isAuthenticated from '../middlewares/jwt.middleware'
-import User, { IUser } from '../models/User.model'
-import { Request } from '../types'
-import TempHashModel from '../models/TempHash.model'
 import { transporter } from '../config/transporter.config'
+import isAuthenticated from '../middlewares/jwt.middleware'
+import TempHashModel from '../models/TempHash.model'
+import UserModel, { User } from '../models/User.model'
+import { Request } from '../types'
+const router = Router()
 
 interface RequestBody {
   username: string
@@ -33,7 +33,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     const salt = await bcrypt.genSalt(saltRounds)
     const hashedPassword = await bcrypt.hash(password, salt)
 
-    const { _id } = await User.create({
+    const { _id } = await UserModel.create({
       password: hashedPassword,
       username,
       email
@@ -58,7 +58,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    const user = await User.findOne({ username })
+    const user = await UserModel.findOne({ username })
 
     if (!user) {
       res.status(404).json({ error: true, message: 'User not found.' })
@@ -97,37 +97,59 @@ router.put(
       phone,
       address,
       nif,
-      tags
-    } = req.body
+      email,
+      tags,
+      invoiceTermsAndConditions
+    }: Partial<User> = req.body
 
     try {
-      if (
-        !logoUrl ||
-        !companyName ||
-        !companyDescription ||
-        !phone ||
-        !address ||
-        !nif ||
-        !tags
-      ) {
+      const payload: Partial<User> = {
+        ...(logoUrl && { logoUrl }),
+        ...(companyName && { companyName }),
+        ...(companyDescription && { companyDescription }),
+        ...(phone && { phone }),
+        ...(address && { address }),
+        ...(nif && { nif }),
+        ...(email && { email }),
+        ...(tags && { tags }),
+        ...(invoiceTermsAndConditions && { invoiceTermsAndConditions })
+      }
+
+      if (!Object.keys(payload).length) {
         res.status(400).json({
           error: true,
-          message: 'All user information must be provided.'
+          message: 'The information must be provided.'
         })
         return
       }
 
-      const payload: Partial<IUser> = {
-        logoUrl,
-        companyName,
-        companyDescription,
-        phone,
-        address,
-        nif,
-        tags
+      await UserModel.findByIdAndUpdate(_id, payload)
+
+      res.status(204).json({})
+    } catch (err) {
+      console.error(err)
+      res.status(500).json({ error: true, message: err })
+    }
+  }
+)
+
+router.put(
+  '/update/tags',
+  isAuthenticated,
+  async (req: Request, res: Response): Promise<void> => {
+    const { _id } = req.payload
+    const { tags }: { tags: string[] } = req.body
+
+    try {
+      if (!tags.length) {
+        res.status(400).json({
+          error: true,
+          message: 'A tag must be provided.'
+        })
+        return
       }
 
-      await User.findByIdAndUpdate(_id, payload)
+      await UserModel.findByIdAndUpdate(_id, { tags })
 
       res.status(204).json({})
     } catch (err) {
@@ -143,14 +165,14 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     const { _id } = req.payload
     try {
-      const user = await User.findById(_id)
+      const user = await UserModel.findById(_id)
 
       if (!user) {
         res.status(401).json({ error: true, message: 'User not found.' })
         return
       }
 
-      const payload: IUser = {
+      const payload: User = {
         _id: user._id,
         username: user.username,
         logoUrl: user.logoUrl,
@@ -195,7 +217,7 @@ router.post('/change_password/request/:email', async (req: Request, res) => {
   const { email } = req.params
 
   try {
-    const user = await User.findOne({ email })
+    const user = await UserModel.findOne({ email })
 
     if (!user) {
       res.status(404).json({ message: 'User not found.' })

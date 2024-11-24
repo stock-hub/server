@@ -1,7 +1,7 @@
 import { Response, Router } from 'express'
 const router = Router()
 import { v2 as cloudinary } from 'cloudinary'
-import Product, { IProduct } from '../models/Product.model'
+import ProductModel, { Product } from '../models/Product.model'
 import isAuthenticated from '../middlewares/jwt.middleware'
 import { Request } from '../types'
 
@@ -32,7 +32,7 @@ router.get(
     const skip = (page - 1) * limit
 
     try {
-      const totalProducts = await Product.countDocuments({ user: userId })
+      const totalProducts = await ProductModel.countDocuments({ user: userId })
       const totalPages = Math.ceil(totalProducts / limit)
       const searchCondition = { user: userId }
 
@@ -53,7 +53,7 @@ router.get(
         return
       }
 
-      const products = await Product.find(searchCondition)
+      const products = await ProductModel.find(searchCondition)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -76,7 +76,7 @@ router.get(
     const userId = req.payload._id
 
     try {
-      const products = await Product.find({
+      const products = await ProductModel.find({
         user: userId,
         name: { $regex: search_query, $options: 'i' }
       })
@@ -101,11 +101,11 @@ router.post(
       onSell,
       inStock,
       imageUrl
-    }: Partial<IProduct> = req.body
+    }: Partial<Product> = req.body
     const userId = req.payload._id
 
     try {
-      await Product.create({
+      await ProductModel.create({
         name,
         description,
         price,
@@ -131,7 +131,7 @@ router.get(
     const { productId } = req.params
 
     try {
-      const product = await Product.findById(productId).populate('user')
+      const product = await ProductModel.findById(productId).populate('user')
 
       res.status(200).json(product)
     } catch (error) {
@@ -157,7 +157,7 @@ router.put(
     const { productId } = req.params
 
     try {
-      await Product.findByIdAndUpdate(productId, {
+      await ProductModel.findByIdAndUpdate(productId, {
         name,
         description,
         price,
@@ -182,7 +182,7 @@ router.delete(
     const { productId } = req.params
 
     try {
-      const product = await Product.findById(productId)
+      const product = await ProductModel.findById(productId)
 
       if (!product) {
         res.status(404).json({ message: 'Product not found.' })
@@ -196,7 +196,7 @@ router.delete(
         cloudinary.uploader.destroy(`stockhub/${imgId}`)
       })
 
-      await Product.findByIdAndDelete(productId)
+      await ProductModel.findByIdAndDelete(productId)
 
       res.json({ message: 'Product successfully removed.' })
     } catch (err) {

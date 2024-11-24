@@ -1,7 +1,7 @@
 import { Response, Router } from 'express'
 import isAuthenticated from '../middlewares/jwt.middleware'
 import ClientModel from '../models/Client.model'
-import Invoice, { IInvoice } from '../models/Invoice.model'
+import InvoiceModel, { Invoice } from '../models/Invoice.model'
 import { Request } from '../types'
 import SignatureModel from '../models/Signature.model'
 
@@ -26,11 +26,11 @@ router.post(
       clientEmail,
       clientTelephone,
       invoiceId
-    }: Partial<IInvoice> = req.body
+    }: Partial<Invoice> = req.body
     const userId = req.payload._id
 
     try {
-      const invoice = await Invoice.create({
+      const invoice = await InvoiceModel.create({
         user: userId,
         products,
         totalValue,
@@ -90,7 +90,7 @@ router.get(
     const skip = (page - 1) * limit
 
     try {
-      const totalProducts = await Invoice.countDocuments({ user: userId })
+      const totalProducts = await InvoiceModel.countDocuments({ user: userId })
       const totalPages = Math.ceil(totalProducts / limit)
       const searchCondition = { user: userId }
 
@@ -108,7 +108,7 @@ router.get(
         }
       }
 
-      const invoices = await Invoice.find(searchCondition)
+      const invoices = await InvoiceModel.find(searchCondition)
         .populate('products.product')
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -131,7 +131,7 @@ router.get(
     const { invoiceId } = req.params
 
     try {
-      const invoice = await Invoice.findById(invoiceId).populate([
+      const invoice = await InvoiceModel.findById(invoiceId).populate([
         { path: 'products.product' },
         { path: 'user' }
       ])
@@ -183,12 +183,12 @@ router.delete(
     const { invoiceId } = req.params
 
     try {
-      const invoice = await Invoice.findOneAndDelete({ invoiceId })
+      const invoice = await InvoiceModel.findOneAndDelete({ invoiceId })
       await ClientModel.findOneAndUpdate(
-        { dni: (invoice as unknown as IInvoice).clientId },
+        { dni: (invoice as unknown as Invoice).clientId },
         {
           $pull: {
-            invoices: (invoice as unknown as IInvoice)._id
+            invoices: (invoice as unknown as Invoice)._id
           }
         }
       )

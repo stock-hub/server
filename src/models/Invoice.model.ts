@@ -1,9 +1,9 @@
 import { Schema, model } from 'mongoose'
-import { IProduct } from './Product.model'
-import { IUser } from './User.model'
+import { Product } from './Product.model'
+import { User } from './User.model'
 
 export interface InvoiceProduct {
-  product: IProduct
+  product: Product
   name: string
   quantity: string
   deposit?: number
@@ -11,9 +11,9 @@ export interface InvoiceProduct {
   return?: Date
 }
 
-export interface IInvoice {
+export interface Invoice {
   _id?: string
-  user: IUser
+  user: User
   products: InvoiceProduct[]
   totalValue: number
   deliver: Date
@@ -29,7 +29,7 @@ export interface IInvoice {
   updatedAt: Date
 }
 
-const invoiceSchema = new Schema<IInvoice>(
+const invoiceSchema = new Schema<Invoice>(
   {
     user: {
       type: Schema.Types.ObjectId,

@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose'
-import { IProduct } from './Product.model'
-import { IInvoice } from './Invoice.model'
+import { Product } from './Product.model'
+import { Invoice } from './Invoice.model'
 
 export interface Client {
   _id?: string
@@ -10,9 +10,9 @@ export interface Client {
   phone: number
   email: string
   imgUrl?: string
-  boughtProducts: IProduct[]
-  rentedProducts: IProduct[]
-  invoices: IInvoice[]
+  boughtProducts: Product[]
+  rentedProducts: Product[]
+  invoices: Invoice[]
   createdAt: Date
   updatedAt: Date
 }

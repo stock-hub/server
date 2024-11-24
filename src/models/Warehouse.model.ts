@@ -1,19 +1,19 @@
 import { Schema, model } from 'mongoose'
-import { IInvoice } from './Invoice.model'
-import { IProduct } from './Product.model'
+import { Invoice } from './Invoice.model'
+import { Product } from './Product.model'
 
-export interface IWarehouse {
+export interface Warehouse {
   _id?: string
   name: string
   location: string
   contactInformation: number
-  products: IProduct[]
-  invoices: IInvoice[]
+  products: Product[]
+  invoices: Invoice[]
   createdAt: Date
   updatedAt: Date
 }
 
-const warehouseSchema = new Schema<IWarehouse>(
+const warehouseSchema = new Schema<Warehouse>(
   {
     name: {
       type: String,

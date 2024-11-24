@@ -1,9 +1,9 @@
 import 'dotenv/config'
 import mongoose from 'mongoose'
 import { faker } from '@faker-js/faker'
-import Product, { IProduct } from '../models/Product.model'
+import Product, { Product } from '../models/Product.model'
 
-type seedProduct = Omit<IProduct, '_id' | 'createdAt' | 'updatedAt'>
+type seedProduct = Omit<Product, '_id' | 'createdAt' | 'updatedAt'>
 
 const MONGO_URI = process.env.MONGODB_URI
 const ADMIN_ID = process.env.ADMIN_ID

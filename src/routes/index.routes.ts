@@ -1,6 +1,6 @@
 import { Router } from 'express'
 const router = Router()
-import authRoutes from './auth.routes'
+import authRoutes from './user.routes'
 import panelRoutes from './panel.routes'
 import cloudinaryRoutes from './cloud_images.routes'
 import productsRoutes from './product.routes'

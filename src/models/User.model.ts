@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose'
 
-export interface IUser {
+export interface User {
   _id?: string
   username: string
   password?: string
@@ -18,9 +18,7 @@ export interface IUser {
   updatedAt?: Date
 }
 
-const tagsSize = (value: string[]) => value.length <= 10
-
-const userSchema = new Schema<IUser>(
+const userSchema = new Schema<User>(
   {
     username: {
       type: String,
@@ -60,8 +58,7 @@ const userSchema = new Schema<IUser>(
     },
     tags: {
       type: [String],
-      required: false,
-      validate: [tagsSize, '{PATH} exceeds the limit of 10']
+      required: false
     },
     invoiceTermsAndConditions: {
       type: String,
