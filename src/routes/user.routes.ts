@@ -15,11 +15,11 @@ interface RequestBody {
   email: string
 }
 
+const saltRounds = 10
 const randomStr = randomstring.generate(128)
 
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
   const { password, username, email }: RequestBody = req.body
-  const saltRounds = 10
 
   if (!password || !username) {
     res.status(400).json({
@@ -232,7 +232,7 @@ router.post('/change_password/request/:email', async (req: Request, res) => {
     await transporter.sendMail({
       from: `"Stockhub" <${process.env.EMAIL_USER}>`,
       to: user.email,
-      subject: 'Change password',
+      subject: 'Cambiar contraseña',
       html: `
           <div style="max-width: 700px; margin: 0 auto;text-align: center;">
             <img src="https://res.cloudinary.com/andresgarcia/image/upload/v1731277373/stockhub/assets/b1f5vdy38bfmurbizji5.png" alt="Stockhub logo" style="width: 100%;">
@@ -250,6 +250,56 @@ router.post('/change_password/request/:email', async (req: Request, res) => {
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: true, message: err })
+  }
+})
+
+router.post('/change_password/:id', async (req, res) => {
+  const { id } = req.params
+  const { new_password } = req.body
+
+  try {
+    const tempHash = await TempHashModel.findOne({ hash: id })
+
+    if (!tempHash) {
+      res
+        .status(400)
+        .json({ error: true, message: 'Password change unauthorized.' })
+      return
+    }
+
+    const salt = bcrypt.genSaltSync(saltRounds)
+    const hashedPassword = bcrypt.hashSync(new_password, salt)
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { email: tempHash.email },
+      {
+        password: hashedPassword
+      },
+      { new: true }
+    )
+
+    await TempHashModel.findByIdAndDelete(tempHash._id)
+
+    await transporter.sendMail({
+      from: `"Stockhub" <${process.env.EMAIL_USER}>`,
+      to: tempHash.email,
+      subject: 'Contraseña cambiada',
+      html: `
+          <div style="max-width: 700px; margin: 0 auto;text-align: center;">
+            <img src="https://res.cloudinary.com/andresgarcia/image/upload/v1731277373/stockhub/assets/b1f5vdy38bfmurbizji5.png" alt="Stockhub logo" style="width: 100%;">
+            <div style="width: 90%; margin: 1rem auto;">
+              <h1>Hola, ${updatedUser.username}</h1><br>
+              <p>Tu contraseña ha sido cambiada correctamente.</p>
+              <p>Si no has sido tú, ve a tu perfil y cambia de nuevo la contraseña.</p>
+              <p><a style="color: #000; font-weight: 700; font-size: 20px; display: inline-block" href="${process.env.ORIGIN}">stockhub.es</a></p>
+            </div>
+          </div>
+        `
+    })
+
+    res.status(200).json({ message: 'Password changed successfully.' })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Internal server error' })
   }
 })
 

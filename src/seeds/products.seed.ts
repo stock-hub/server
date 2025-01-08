@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import mongoose from 'mongoose'
 import { faker } from '@faker-js/faker'
-import Product, { Product } from '../models/Product.model'
+import ProductModel, { Product } from '../models/Product.model'
 
 type seedProduct = Omit<Product, '_id' | 'createdAt' | 'updatedAt'>
 
@@ -36,7 +36,7 @@ const seedDB = async () => {
       { length: ARRAY_ELEMENTS },
       generateProduct
     )
-    const productsFromDB = await Product.create(products)
+    const productsFromDB = await ProductModel.create(products)
     console.log(`Created ${productsFromDB.length} products`)
     await mongoose.connection.close()
   } catch (error) {
