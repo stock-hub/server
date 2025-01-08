@@ -8,6 +8,8 @@ import routes from './routes/index.routes'
 const app = express()
 config(app)
 
+app.head('/', (_, res) => res.json({}))
+app.get('/', (_, res) => res.status(204).json({}))
 app.use('/api', routes)
 
 errorHandling(app)

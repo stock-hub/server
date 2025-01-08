@@ -7,7 +7,6 @@ import productsRoutes from './product.routes'
 import s3Routes from './cloud_files.routes'
 import invoicesRoutes from './invoices.routes'
 
-router.get('/', (_, res) => res.json('All good in here'))
 router.use('/admin', authRoutes)
 router.use('/panel', panelRoutes)
 router.use('/products', productsRoutes)
