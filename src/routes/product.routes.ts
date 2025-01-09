@@ -110,8 +110,8 @@ router.post(
         description,
         price,
         tags,
-        onSell: String(onSell) === 'on',
-        inStock: String(inStock) === 'on',
+        onSell,
+        inStock,
         imageUrl,
         user: userId
       })
