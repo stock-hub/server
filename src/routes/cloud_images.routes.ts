@@ -1,8 +1,9 @@
-import { Request, Response, Router } from 'express'
+import { Response, Router } from 'express'
 const router = Router()
 import isAuthenticated from '../middlewares/jwt.middleware'
 import uploader from '../config/cloudinary.config'
 import { v2 as cloudinary } from 'cloudinary'
+import { Request } from '../types'
 
 interface MulterRequest extends Request {
   files: Express.Multer.File[]
@@ -31,11 +32,12 @@ router.post(
   isAuthenticated,
   (req: Request, res: Response) => {
     const { image_url } = req.params
+    const { _id } = req.payload
     const url = image_url.split('/')
     const imgId = url.at(-1).split('.')[0]
 
     try {
-      cloudinary.uploader.destroy(`stockhub/${imgId}`)
+      cloudinary.uploader.destroy(`stockhub/${_id}/${imgId}`)
       res.status(200).json({ sucess: 'Image deleted successfully' })
     } catch (error) {
       console.error(error)

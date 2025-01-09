@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary'
 import { CloudinaryStorage } from 'multer-storage-cloudinary'
 import multer from 'multer'
+import { Request } from '../types'
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -10,8 +11,10 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: async () => {
-    return { allowed_formats: ['jpg', 'png'], folder: 'stockhub' }
+  params: async (req: Request) => {
+    const userId = req.payload._id
+
+    return { allowed_formats: ['jpg', 'png'], folder: `stockhub/${userId}` }
   }
 })
 
