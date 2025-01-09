@@ -8,6 +8,7 @@ import UserModel from '../models/User.model'
 import { createTransporter } from '../config/transporter.config'
 import { formatDate } from '../common/date'
 import { S3StorageService } from '../services/s3.service'
+import { handleBody } from '../common/buffer'
 
 interface SearchFilter {
   query?: string
@@ -240,7 +241,7 @@ router.post(
           .json({ error: true, message: 'File not found in S3 bucket.' })
       }
 
-      const pdfBuffer = await s3Result.Body.transformToString()
+      const pdfBuffer = await handleBody(s3Result.Body)
 
       const attachments = [
         {

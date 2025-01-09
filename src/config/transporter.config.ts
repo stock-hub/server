@@ -6,8 +6,6 @@ export const createTransporter = (options?: { user: string; pass: string }) => {
     ? decryptPassword(options.pass)
     : process.env.EMAIL_PASSWORD
 
-  console.log(authPass)
-
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: +process.env.EMAIL_PORT,
