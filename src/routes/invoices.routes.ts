@@ -254,7 +254,7 @@ router.post(
         user: user.companyEmail,
         pass: user.companyEmailPassword
       }).sendMail({
-        from: `"${user.companyName}" <${process.env.EMAIL_USER}>`,
+        from: `"${user.companyName}" <${user.companyEmail}>`,
         to: invoice.clientEmail,
         subject: 'Copia de tu pedido',
         attachments,
