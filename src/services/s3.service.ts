@@ -8,6 +8,7 @@ import {
   S3Client
 } from '@aws-sdk/client-s3'
 import { config } from '../config/aws.config'
+import { NodeJsClient } from '@smithy/types'
 
 export class S3StorageService {
   #client: S3Client
@@ -19,7 +20,7 @@ export class S3StorageService {
         accessKeyId: config.accessKeyId,
         secretAccessKey: config.secretAccessKey
       }
-    })
+    }) as NodeJsClient<S3Client>
   }
 
   async upload(options: {

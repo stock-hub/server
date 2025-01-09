@@ -7,6 +7,8 @@ export interface User {
   logoUrl: string
   companyName: string
   companyDescription: string
+  companyEmail?: string
+  companyEmailPassword?: string
   phone: number
   address: string
   nif: string
@@ -39,6 +41,14 @@ const userSchema = new Schema<User>(
     companyDescription: {
       type: String,
       required: false
+    },
+    companyEmail: {
+      type: String,
+      required: true
+    },
+    companyEmailPassword: {
+      type: String,
+      required: true
     },
     phone: {
       type: Number,

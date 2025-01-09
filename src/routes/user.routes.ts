@@ -2,11 +2,12 @@ import bcrypt from 'bcryptjs'
 import { Response, Router } from 'express'
 import jwt from 'jsonwebtoken'
 import randomstring from 'randomstring'
-import { transporter } from '../config/transporter.config'
+import { createTransporter } from '../config/transporter.config'
 import isAuthenticated from '../middlewares/jwt.middleware'
 import TempHashModel from '../models/TempHash.model'
 import UserModel, { User } from '../models/User.model'
 import { Request } from '../types'
+import { encryptPassword } from '../common/encryption-utils'
 const router = Router()
 
 interface RequestBody {
@@ -96,6 +97,8 @@ router.put(
       logoUrl,
       companyName,
       companyDescription,
+      companyEmail,
+      companyEmailPassword,
       phone,
       address,
       nif,
@@ -109,6 +112,10 @@ router.put(
         ...(logoUrl && { logoUrl }),
         ...(companyName && { companyName }),
         ...(companyDescription && { companyDescription }),
+        ...(companyEmail && { companyEmail }),
+        ...(companyEmailPassword && {
+          companyEmailPassword: encryptPassword(companyEmailPassword)
+        }),
         ...(phone && { phone }),
         ...(address && { address }),
         ...(nif && { nif }),
@@ -180,6 +187,8 @@ router.get(
         logoUrl: user.logoUrl,
         companyName: user.companyName,
         companyDescription: user.companyDescription,
+        companyEmail: user.companyEmail,
+        companyEmailPassword: user.companyEmailPassword,
         phone: user.phone,
         address: user.address,
         nif: user.nif,
@@ -231,7 +240,7 @@ router.post('/change_password/request/:email', async (req: Request, res) => {
       hash: randomStr
     })
 
-    await transporter.sendMail({
+    await createTransporter().sendMail({
       from: `"Stockhub" <${process.env.EMAIL_USER}>`,
       to: user.email,
       subject: 'Cambiar contraseña',
@@ -281,7 +290,7 @@ router.post('/change_password/:id', async (req, res) => {
 
     await TempHashModel.findByIdAndDelete(tempHash._id)
 
-    await transporter.sendMail({
+    await createTransporter().sendMail({
       from: `"Stockhub" <${process.env.EMAIL_USER}>`,
       to: tempHash.email,
       subject: 'Contraseña cambiada',

@@ -4,6 +4,10 @@ import ClientModel from '../models/Client.model'
 import InvoiceModel, { Invoice } from '../models/Invoice.model'
 import { Request } from '../types'
 import SignatureModel from '../models/Signature.model'
+import UserModel from '../models/User.model'
+import { createTransporter } from '../config/transporter.config'
+import { formatDate } from '../common/date'
+import { S3StorageService } from '../services/s3.service'
 
 interface SearchFilter {
   query?: string
@@ -195,6 +199,84 @@ router.delete(
       )
 
       res.status(204).json()
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: true, message: 'Internal server error.' })
+    }
+  }
+)
+
+router.post(
+  '/:invoiceId/send_email',
+  isAuthenticated,
+  async (req: Request, res: Response) => {
+    const { invoiceId } = req.params
+    const userId = req.payload._id
+
+    try {
+      const s3StorageService = new S3StorageService()
+      const invoice = await InvoiceModel.findOne({ invoiceId }).populate('user')
+      const user = await UserModel.findById(userId)
+
+      if (!invoice) {
+        res.status(404).json({ error: true, message: 'Invoice not found.' })
+        return
+      }
+
+      if (!user || !user.companyEmail || !user.companyEmailPassword) {
+        res.status(400).json({
+          error: true,
+          message: 'User must have a company email and password to send emails.'
+        })
+        return
+      }
+
+      const filename = `${userId}/${invoiceId}.pdf`
+      const s3Result = await s3StorageService.download(filename)
+
+      if (!s3Result.Body) {
+        return res
+          .status(404)
+          .json({ error: true, message: 'File not found in S3 bucket.' })
+      }
+
+      const pdfBuffer = await s3Result.Body.transformToString()
+
+      const attachments = [
+        {
+          filename: `${invoiceId}.pdf`,
+          content: pdfBuffer,
+          contentType: 'application/pdf'
+        }
+      ]
+
+      await createTransporter({
+        user: user.companyEmail,
+        pass: user.companyEmailPassword
+      }).sendMail({
+        from: `"${user.companyName}" <${process.env.EMAIL_USER}>`,
+        to: invoice.clientEmail,
+        subject: 'Copia de tu pedido',
+        attachments,
+        html: `
+                <div style="max-width: 700px; margin: 0 auto;text-align: center;">
+                  <img src="https://res.cloudinary.com/andresgarcia/image/upload/v1731277373/stockhub/assets/b1f5vdy38bfmurbizji5.png" alt="Stockhub logo" style="width: 100%;">
+                  <div style="width: 90%; margin: 1rem auto;">
+                    <h1>Hola, ${invoice.clientName}!</h1><br>
+                    <p>Aquí tienes una copia de tu pedido del día ${formatDate(
+                      invoice.createdAt
+                    )}</p>
+                    <p>Si tienes dudas o necesitas más información, no dudes en contactarnos.</p>
+                    <p><a href="tel:${user.phone}">${user.phone}</a></p>
+                    <a href= "mailto:${user.companyEmail}">${
+          user.companyEmail
+        }</a>
+                  </div>
+                </div>
+              `
+      })
+
+      res.status(204).json({})
     } catch (error) {
       console.error(error)
       res.status(500).json({ error: true, message: 'Internal server error.' })
