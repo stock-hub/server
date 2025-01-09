@@ -56,7 +56,8 @@ router.post(
           name: clientName,
           address: clientAddress,
           dni: clientId,
-          phone: clientTelephone
+          phone: clientTelephone,
+          email: clientEmail
         })
 
         await ClientModel.findByIdAndUpdate(newClient._id, {
