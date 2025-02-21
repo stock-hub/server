@@ -10,20 +10,38 @@ interface MulterRequest extends Request {
 }
 
 router.post(
-  '/upload_image',
+  '/upload_images',
   isAuthenticated,
   uploader.array('imageUrl'),
   (req: MulterRequest, res: Response) => {
     if (!req.files.length) {
       res
         .status(500)
-        .json({ error: true, message: 'Error while uploading image.' })
+        .json({ error: true, message: 'Error while uploading images.' })
       return
     }
 
     const cloudinaryUrls: Array<string> = req.files.map(file => file.path)
 
     res.status(200).json({ cloudinary_urls: cloudinaryUrls })
+  }
+)
+
+router.post(
+  '/upload_image',
+  isAuthenticated,
+  uploader.single('imageUrl'),
+  (req: MulterRequest, res: Response) => {
+    if (!req.file) {
+      res
+        .status(500)
+        .json({ error: true, message: 'Error while uploading image.' })
+      return
+    }
+
+    const cloudinaryUrl: string = req.file.path
+
+    res.status(200).json({ cloudinary_url: cloudinaryUrl })
   }
 )
 

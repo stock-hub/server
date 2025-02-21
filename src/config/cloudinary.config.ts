@@ -14,7 +14,10 @@ const storage = new CloudinaryStorage({
   params: async (req: Request) => {
     const userId = req.payload._id
 
-    return { allowed_formats: ['jpg', 'png'], folder: `stockhub/${userId}` }
+    return {
+      allowed_formats: ['jpg', 'png', 'webp'],
+      folder: `stockhub/${userId}`
+    }
   }
 })
 
