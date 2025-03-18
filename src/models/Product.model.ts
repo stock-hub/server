@@ -11,6 +11,12 @@ export interface Product {
   onSell: boolean
   inStock: boolean
   user: User
+  quantity: number
+  maintenance?: {
+    date: Date
+    description: string
+    personInCharge: string
+  }
   createdAt?: Date
   updatedAt?: Date
 }
@@ -51,6 +57,25 @@ const productSchema = new Schema<Product>(
     user: {
       type: Schema.Types.ObjectId,
       ref: 'User'
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      default: 1
+    },
+    maintenance: {
+      date: {
+        type: Date,
+        required: true
+      },
+      description: {
+        type: String,
+        required: true
+      },
+      personInCharge: {
+        type: Object,
+        required: true
+      }
     }
   },
   {

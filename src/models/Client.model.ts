@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose'
 import { Product } from './Product.model'
-import { Invoice } from './Invoice.model'
+import { Order } from './Order.model'
 
 export interface Client {
   _id?: string
@@ -12,7 +12,8 @@ export interface Client {
   imgUrl?: string
   boughtProducts: Product[]
   rentedProducts: Product[]
-  invoices: Invoice[]
+  orders: Order[]
+  observations?: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -55,12 +56,16 @@ const clientSchema = new Schema<Client>(
         ref: 'Product'
       }
     ],
-    invoices: [
+    orders: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'Invoice'
+        ref: 'Order'
       }
-    ]
+    ],
+    observations: {
+      type: [String],
+      required: false
+    }
   },
   {
     timestamps: true

@@ -1,7 +1,7 @@
 import { Response, Router } from 'express'
 import isAuthenticated from '../middlewares/jwt.middleware'
 import ClientModel from '../models/Client.model'
-import InvoiceModel, { Invoice } from '../models/Invoice.model'
+import OrderModel, { Order } from '../models/Order.model'
 import { Request } from '../types'
 import SignatureModel from '../models/Signature.model'
 import UserModel from '../models/User.model'
@@ -30,12 +30,13 @@ router.post(
       clientId,
       clientEmail,
       clientTelephone,
-      invoiceId
-    }: Partial<Invoice> = req.body
+      clientObservation,
+      orderId
+    }: Partial<Order> = req.body
     const userId = req.payload._id
 
     try {
-      const invoice = await InvoiceModel.create({
+      const order = await OrderModel.create({
         user: userId,
         products,
         totalValue,
@@ -45,7 +46,8 @@ router.post(
         clientId,
         clientEmail,
         clientTelephone,
-        invoiceId
+        clientObservation,
+        orderId
       })
 
       const client = await ClientModel.findOne({ dni: clientId })
@@ -66,20 +68,29 @@ router.post(
         })
 
         await ClientModel.findByIdAndUpdate(newClient._id, {
-          $push: { invoices: invoice._id, rentedProducts, boughtProducts }
+          $push: {
+            orders: order._id,
+            rentedProducts,
+            boughtProducts,
+            ...(clientObservation.length && {
+              observations: clientObservation
+            })
+          }
         })
       } else {
         await ClientModel.findByIdAndUpdate(client._id, {
-          $push: { invoices: invoice._id, rentedProducts, boughtProducts }
+          $push: { orders: order._id, rentedProducts, boughtProducts }
         })
       }
 
-      const newInvoice = await invoice.populate('products.product')
+      const newOrder = await order.populate('products.product')
 
-      res.status(201).json(newInvoice)
+      res.status(201).json(newOrder)
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )
@@ -96,7 +107,7 @@ router.get(
     const skip = (page - 1) * limit
 
     try {
-      const totalProducts = await InvoiceModel.countDocuments({ user: userId })
+      const totalProducts = await OrderModel.countDocuments({ user: userId })
       const totalPages = Math.ceil(totalProducts / limit)
       const searchCondition = { user: userId }
 
@@ -114,7 +125,7 @@ router.get(
         }
       }
 
-      const invoices = await InvoiceModel.find(searchCondition)
+      const orders = await OrderModel.find(searchCondition)
         .populate('products.product')
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -122,79 +133,87 @@ router.get(
 
       res
         .status(200)
-        .json({ total_pages: totalPages, current_page: page, invoices })
+        .json({ total_pages: totalPages, current_page: page, orders })
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )
 
 router.get(
-  '/:invoiceId/view',
+  '/:orderId/view',
   isAuthenticated,
   async (req: Request, res: Response): Promise<void> => {
-    const { invoiceId } = req.params
+    const { orderId } = req.params
 
     try {
-      const invoice = await InvoiceModel.findById(invoiceId).populate([
+      const order = await OrderModel.findById(orderId).populate([
         { path: 'products.product' },
         { path: 'user' }
       ])
 
-      res.status(200).json(invoice)
+      res.status(200).json(order)
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )
 
 router.post(
-  '/:invoiceId/sign',
+  '/:orderId/sign',
   async (req: Request, res: Response): Promise<void> => {
-    const { invoiceId } = req.params
+    const { orderId } = req.params
     const { signature } = req.body
 
     try {
-      await SignatureModel.create({ invoiceId, signature })
+      await SignatureModel.create({ orderId, signature })
 
       res.status(204).json()
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )
 
 router.get(
-  '/:invoiceId/sign/view',
+  '/:orderId/sign/view',
   async (req: Request, res: Response): Promise<void> => {
-    const { invoiceId } = req.params
+    const { orderId } = req.params
     try {
-      const { signature } = await SignatureModel.findOne({ invoiceId })
+      const { signature } = await SignatureModel.findOne({ orderId })
 
       res.status(200).json({ signature })
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )
 
 router.delete(
-  '/:invoiceId/delete',
+  '/:orderId/delete',
   isAuthenticated,
   async (req: Request, res: Response): Promise<void> => {
-    const { invoiceId } = req.params
+    const { orderId } = req.params
 
     try {
-      const invoice = await InvoiceModel.findOneAndDelete({ invoiceId })
+      const order = await OrderModel.findOneAndDelete({ orderId })
       await ClientModel.findOneAndUpdate(
-        { dni: (invoice as unknown as Invoice).clientId },
+        { dni: (order as unknown as Order).clientId },
         {
           $pull: {
-            invoices: (invoice as unknown as Invoice)._id
+            orders: (order as unknown as Order)._id
           }
         }
       )
@@ -202,25 +221,27 @@ router.delete(
       res.status(204).json()
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )
 
 router.post(
-  '/:invoiceId/send_email',
+  '/:orderId/send_email',
   isAuthenticated,
   async (req: Request, res: Response) => {
-    const { invoiceId } = req.params
+    const { orderId } = req.params
     const userId = req.payload._id
 
     try {
       const s3StorageService = new S3StorageService()
-      const invoice = await InvoiceModel.findOne({ invoiceId }).populate('user')
+      const order = await OrderModel.findOne({ orderId }).populate('user')
       const user = await UserModel.findById(userId)
 
-      if (!invoice) {
-        res.status(404).json({ error: true, message: 'Invoice not found.' })
+      if (!order) {
+        res.status(404).json({ error: true, message: 'Order not found.' })
         return
       }
 
@@ -232,7 +253,7 @@ router.post(
         return
       }
 
-      const filename = `${userId}/${invoiceId}.pdf`
+      const filename = `${userId}/${orderId}.pdf`
       const s3Result = await s3StorageService.download(filename)
 
       if (!s3Result.Body) {
@@ -245,7 +266,7 @@ router.post(
 
       const attachments = [
         {
-          filename: `${invoiceId}.pdf`,
+          filename: `${orderId}.pdf`,
           content: pdfBuffer,
           contentType: 'application/pdf'
         }
@@ -256,16 +277,16 @@ router.post(
         pass: user.companyEmailPassword
       }).sendMail({
         from: `"${user.companyName}" <${user.companyEmail}>`,
-        to: invoice.clientEmail,
+        to: order.clientEmail,
         subject: 'Copia de tu pedido',
         attachments,
         html: `
                 <div style="max-width: 700px; margin: 0 auto;text-align: center;">
                   <img src="https://res.cloudinary.com/andresgarcia/image/upload/v1731277373/stockhub/assets/b1f5vdy38bfmurbizji5.png" alt="Stockhub logo" style="width: 100%;">
                   <div style="width: 90%; margin: 1rem auto;">
-                    <h1>Hola, ${invoice.clientName}!</h1><br>
+                    <h1>Hola, ${order.clientName}!</h1><br>
                     <p>Aquí tienes una copia de tu pedido del día ${formatDate(
-                      invoice.createdAt
+                      order.createdAt
                     )}</p>
                     <p>Si tienes dudas o necesitas más información, no dudes en contactarnos.</p>
                     <p><a href="tel:${user.phone}">${user.phone}</a></p>
@@ -280,7 +301,9 @@ router.post(
       res.status(204).json({})
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )

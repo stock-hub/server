@@ -61,9 +61,11 @@ router.get(
       res
         .status(200)
         .json({ total_pages: totalPages, current_page: page, products })
-    } catch (err) {
-      console.error(err)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+    } catch (error) {
+      console.error(error)
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )
@@ -82,9 +84,11 @@ router.get(
       })
 
       res.status(200).json(products)
-    } catch (err) {
-      console.error(err)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+    } catch (error) {
+      console.error(error)
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )
@@ -117,9 +121,11 @@ router.post(
       })
 
       res.status(201).json({ message: 'Product successfully created.' })
-    } catch (err) {
-      console.error(err)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+    } catch (error) {
+      console.error(error)
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )
@@ -136,7 +142,9 @@ router.get(
       res.status(200).json(product)
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )
@@ -170,7 +178,9 @@ router.put(
       res.status(200).json({ message: 'Product successfully updated.' })
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )
@@ -199,9 +209,11 @@ router.delete(
       await ProductModel.findByIdAndDelete(productId)
 
       res.json({ message: 'Product successfully removed.' })
-    } catch (err) {
-      console.error(err)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+    } catch (error) {
+      console.error(error)
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )

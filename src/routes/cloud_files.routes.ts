@@ -38,7 +38,9 @@ router.post(
       })
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )

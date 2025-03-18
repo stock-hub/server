@@ -1,5 +1,17 @@
 import { Schema, model } from 'mongoose'
 
+enum ROLES {
+  ADMIN = 'ADMIN',
+  EMPLOYEE = 'EMPLOYEE'
+}
+
+interface Employee {
+  name: string
+  phone: number
+  email: string
+  role: ROLES
+}
+
 export interface User {
   _id?: string
   username: string
@@ -14,8 +26,9 @@ export interface User {
   nif: string
   email: string
   tags: string[]
-  invoiceTermsAndConditions?: string
+  orderTermsAndConditions?: string
   additionalData?: Record<string, any>
+  employees?: Employee[]
   createdAt?: Date
   updatedAt?: Date
 }
@@ -70,14 +83,35 @@ const userSchema = new Schema<User>(
       type: [String],
       required: false
     },
-    invoiceTermsAndConditions: {
+    orderTermsAndConditions: {
       type: String,
       required: false
     },
     additionalData: {
       type: Object,
       required: false
-    }
+    },
+    employees: [
+      {
+        name: {
+          type: String,
+          required: true
+        },
+        phone: {
+          type: Number,
+          required: true
+        },
+        email: {
+          type: String,
+          required: true
+        },
+        role: {
+          type: String,
+          required: true,
+          enum: Object.values(ROLES)
+        }
+      }
+    ]
   },
   {
     timestamps: true

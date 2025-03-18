@@ -59,7 +59,9 @@ router.post(
       res.status(200).json({ sucess: 'Image deleted successfully' })
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: true, message: 'Internal server error.' })
+      res
+        .status(500)
+        .json({ error: true, message: 'Internal server error.', cause: error })
     }
   }
 )

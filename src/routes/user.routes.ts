@@ -43,7 +43,9 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     res.status(201).json({ message: 'User successfully created', _id })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ error: true, message: 'Internal server error.' })
+    res
+      .status(500)
+      .json({ error: true, message: 'Internal server error.', cause: error })
   }
 })
 
@@ -82,9 +84,11 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     })
 
     res.status(200).json({ authToken })
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: true, message: 'Internal server error.' })
+  } catch (error) {
+    console.error(error)
+    res
+      .status(500)
+      .json({ error: true, message: 'Internal server error.', cause: error })
   }
 })
 
@@ -104,7 +108,7 @@ router.put(
       nif,
       email,
       tags,
-      invoiceTermsAndConditions
+      orderTermsAndConditions
     }: Partial<User> = req.body
 
     try {
@@ -121,7 +125,7 @@ router.put(
         ...(nif && { nif }),
         ...(email && { email }),
         ...(tags && { tags }),
-        ...(invoiceTermsAndConditions && { invoiceTermsAndConditions })
+        ...(orderTermsAndConditions && { orderTermsAndConditions })
       }
 
       if (!Object.keys(payload).length) {
@@ -135,9 +139,9 @@ router.put(
       await UserModel.findByIdAndUpdate(_id, payload)
 
       res.status(204).json({})
-    } catch (err) {
-      console.error(err)
-      res.status(500).json({ error: true, message: err })
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: true, message: error })
     }
   }
 )
@@ -161,9 +165,9 @@ router.put(
       await UserModel.findByIdAndUpdate(_id, { tags })
 
       res.status(204).json({})
-    } catch (err) {
-      console.error(err)
-      res.status(500).json({ error: true, message: err })
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: true, message: error })
     }
   }
 )
@@ -194,14 +198,14 @@ router.get(
         nif: user.nif,
         email: user.email,
         tags: user.tags,
-        invoiceTermsAndConditions: user.invoiceTermsAndConditions,
+        orderTermsAndConditions: user.orderTermsAndConditions,
         additionalData: user.additionalData
       }
 
       res.status(200).json(payload)
-    } catch (err) {
-      console.error(err)
-      res.status(500).json({ error: true, message: err })
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: true, message: error })
     }
   }
 )
@@ -218,9 +222,9 @@ router.post('/sign', (req: Request, res: Response) => {
     })
 
     res.status(200).json({ authToken })
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: true, message: err })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: true, message: error })
   }
 })
 
@@ -258,9 +262,9 @@ router.post('/change_password/request/:email', async (req: Request, res) => {
     })
 
     res.status(204).json({})
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: true, message: err })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: true, message: error })
   }
 })
 
@@ -308,8 +312,8 @@ router.post('/change_password/:id', async (req, res) => {
     })
 
     res.status(200).json({ message: 'Password changed successfully.' })
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    console.error(error)
     res.status(500).json({ message: 'Internal server error' })
   }
 })

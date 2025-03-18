@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose'
 
 export interface Signature {
   _id?: string
-  invoiceId: string
+  orderId: string
   signature: string
   expireAt: Date
   createdAt: Date
@@ -11,7 +11,7 @@ export interface Signature {
 
 const signatureSchema = new Schema<Signature>(
   {
-    invoiceId: {
+    orderId: {
       type: String,
       required: true
     },

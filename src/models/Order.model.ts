@@ -2,19 +2,20 @@ import { Schema, model } from 'mongoose'
 import { Product } from './Product.model'
 import { User } from './User.model'
 
-export interface InvoiceProduct {
+export interface OrderProduct {
   product: Product
   name: string
   quantity: string
   deposit?: number
   valuePerDay?: number
   return?: Date
+  location?: string
 }
 
-export interface Invoice {
+export interface Order {
   _id?: string
   user: User
-  products: InvoiceProduct[]
+  products: OrderProduct[]
   totalValue: number
   deliver: Date
   termsAccepted: boolean
@@ -23,13 +24,14 @@ export interface Invoice {
   clientId: string
   clientEmail: string
   clientTelephone: number
+  clientObservation?: string
   clientSignature?: string
-  invoiceId: string
+  orderId: string
   createdAt: Date
   updatedAt: Date
 }
 
-const invoiceSchema = new Schema<Invoice>(
+const orderSchema = new Schema<Order>(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -57,6 +59,9 @@ const invoiceSchema = new Schema<Invoice>(
         },
         return: {
           type: Date
+        },
+        location: {
+          type: String
         }
       }
     ],
@@ -96,7 +101,10 @@ const invoiceSchema = new Schema<Invoice>(
     clientSignature: {
       type: String
     },
-    invoiceId: {
+    clientObservation: {
+      type: String
+    },
+    orderId: {
       type: String,
       required: true
     }
@@ -106,4 +114,4 @@ const invoiceSchema = new Schema<Invoice>(
   }
 )
 
-export default model('Invoice', invoiceSchema)
+export default model('Order', orderSchema)

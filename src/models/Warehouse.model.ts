@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose'
-import { Invoice } from './Invoice.model'
 import { Product } from './Product.model'
+import { Order } from './Order.model'
 
 export interface Warehouse {
   _id?: string
@@ -8,7 +8,7 @@ export interface Warehouse {
   location: string
   contactInformation: number
   products: Product[]
-  invoices: Invoice[]
+  orders: Order[]
   createdAt: Date
   updatedAt: Date
 }
@@ -33,7 +33,7 @@ const warehouseSchema = new Schema<Warehouse>(
         ref: 'Product'
       }
     ],
-    invoices: {
+    orders: {
       type: [String],
       required: true
     }
