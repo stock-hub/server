@@ -27,7 +27,8 @@ const generateProduct = (): seedProduct => ({
   tags: faker.helpers.arrayElements(TAGS, 2),
   onSell: faker.datatype.boolean(),
   inStock: faker.datatype.boolean(),
-  user: ADMIN_ID as any
+  user: ADMIN_ID as any,
+  quantity: faker.number.int({ min: 1, max: 100 })
 })
 
 const seedDB = async () => {

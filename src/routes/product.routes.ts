@@ -1,7 +1,7 @@
 import { Response, Router } from 'express'
 const router = Router()
 import { v2 as cloudinary } from 'cloudinary'
-import ProductModel, { Product } from '../models/Product.model'
+import ProductModel, { Product, Maintenance } from '../models/Product.model'
 import isAuthenticated from '../middlewares/jwt.middleware'
 import { Request } from '../types'
 
@@ -13,6 +13,7 @@ interface RequestBody {
   onSell: string
   inStock: string
   imageUrl: string
+  maintenance: Maintenance[]
 }
 
 interface SearchFilter {
@@ -160,7 +161,8 @@ router.put(
       tags,
       onSell,
       inStock,
-      imageUrl
+      imageUrl,
+      maintenance
     }: RequestBody = req.body
     const { productId } = req.params
 
@@ -172,7 +174,8 @@ router.put(
         tags,
         onSell,
         inStock,
-        imageUrl
+        imageUrl,
+        maintenance
       })
 
       res.status(200).json({ message: 'Product successfully updated.' })

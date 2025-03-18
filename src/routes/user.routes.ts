@@ -199,7 +199,8 @@ router.get(
         email: user.email,
         tags: user.tags,
         orderTermsAndConditions: user.orderTermsAndConditions,
-        additionalData: user.additionalData
+        additionalData: user.additionalData,
+        employees: user.employees
       }
 
       res.status(200).json(payload)

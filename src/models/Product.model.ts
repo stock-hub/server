@@ -1,6 +1,13 @@
 import { Schema, model } from 'mongoose'
 import { User } from './User.model'
 
+export interface Maintenance {
+  id: string
+  date: Date
+  description: string
+  personInCharge: string
+}
+
 export interface Product {
   _id?: string
   name: string
@@ -12,11 +19,7 @@ export interface Product {
   inStock: boolean
   user: User
   quantity: number
-  maintenance?: {
-    date: Date
-    description: string
-    personInCharge: string
-  }
+  maintenance?: Maintenance[]
   createdAt?: Date
   updatedAt?: Date
 }
@@ -63,20 +66,26 @@ const productSchema = new Schema<Product>(
       required: true,
       default: 1
     },
-    maintenance: {
-      date: {
-        type: Date,
-        required: true
-      },
-      description: {
-        type: String,
-        required: true
-      },
-      personInCharge: {
-        type: Object,
-        required: true
+    maintenance: [
+      {
+        id: {
+          type: String,
+          required: true
+        },
+        date: {
+          type: Date,
+          required: true
+        },
+        description: {
+          type: String,
+          required: true
+        },
+        personInCharge: {
+          type: Object,
+          required: true
+        }
       }
-    }
+    ]
   },
   {
     timestamps: true
