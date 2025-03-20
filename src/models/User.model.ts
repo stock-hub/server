@@ -16,16 +16,16 @@ export interface User {
   _id?: string
   username: string
   password?: string
-  logoUrl: string
-  companyName: string
-  companyDescription: string
+  logoUrl?: string
+  companyName?: string
+  companyDescription?: string
   companyEmail?: string
   companyEmailPassword?: string
-  phone: number
-  address: string
-  nif: string
+  phone?: number
+  address?: string
+  nif?: string
   email: string
-  tags: string[]
+  tags?: string[]
   orderTermsAndConditions?: string
   additionalData?: Record<string, any>
   employees?: Employee[]
@@ -57,11 +57,11 @@ const userSchema = new Schema<User>(
     },
     companyEmail: {
       type: String,
-      required: true
+      required: false
     },
     companyEmailPassword: {
       type: String,
-      required: true
+      required: false
     },
     phone: {
       type: Number,
