@@ -1,9 +1,10 @@
 import { Response, Router } from 'express'
 const router = Router()
 import { v2 as cloudinary } from 'cloudinary'
-import ProductModel, { Product, Maintenance } from '../models/Product.model'
+import ProductModel, { Product } from '../models/Product.model'
 import isAuthenticated from '../middlewares/jwt.middleware'
 import { Request } from '../types'
+import { Maintenance } from '../models/Maintenance.model'
 
 interface RequestBody {
   name: string
@@ -138,7 +139,9 @@ router.get(
     const { productId } = req.params
 
     try {
-      const product = await ProductModel.findById(productId).populate('user')
+      const product = await ProductModel.findById(productId)
+        .populate('user')
+        .populate('maintenance')
 
       res.status(200).json(product)
     } catch (error) {

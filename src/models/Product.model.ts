@@ -1,12 +1,6 @@
 import { Schema, model } from 'mongoose'
 import { User } from './User.model'
-
-export interface Maintenance {
-  id: string
-  date: Date
-  description: string
-  personInCharge: string
-}
+import { Maintenance } from './Maintenance.model'
 
 export interface Product {
   _id?: string
@@ -68,22 +62,8 @@ const productSchema = new Schema<Product>(
     },
     maintenance: [
       {
-        id: {
-          type: String,
-          required: true
-        },
-        date: {
-          type: Date,
-          required: true
-        },
-        description: {
-          type: String,
-          required: true
-        },
-        personInCharge: {
-          type: Object,
-          required: true
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Maintenance'
       }
     ]
   },

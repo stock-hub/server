@@ -7,6 +7,7 @@ import productsRoutes from './product.routes'
 import s3Routes from './cloud_files.routes'
 import ordersRoutes from './orders.routes'
 import clientRoutes from './client.routes'
+import maintenanceRoutes from './maintenance.routes'
 
 router.use('/admin', authRoutes)
 router.use('/panel', panelRoutes)
@@ -15,5 +16,6 @@ router.use('/images', cloudinaryRoutes)
 router.use('/files', s3Routes)
 router.use('/orders', ordersRoutes)
 router.use('/clients', clientRoutes)
+router.use('/maintenances', maintenanceRoutes)
 
 export default router

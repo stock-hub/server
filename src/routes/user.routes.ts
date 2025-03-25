@@ -108,7 +108,8 @@ router.put(
       nif,
       email,
       tags,
-      orderTermsAndConditions
+      orderTermsAndConditions,
+      employees
     }: Partial<User> = req.body
 
     try {
@@ -125,7 +126,8 @@ router.put(
         ...(nif && { nif }),
         ...(email && { email }),
         ...(tags && { tags }),
-        ...(orderTermsAndConditions && { orderTermsAndConditions })
+        ...(orderTermsAndConditions && { orderTermsAndConditions }),
+        ...(employees && { employees })
       }
 
       if (!Object.keys(payload).length) {
