@@ -180,7 +180,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     const { _id } = req.payload
     try {
-      const user = await UserModel.findById(_id)
+      const user = await UserModel.findById(_id).populate('employees')
 
       if (!user) {
         res.status(401).json({ error: true, message: 'User not found.' })

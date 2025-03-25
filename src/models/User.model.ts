@@ -1,16 +1,5 @@
 import { Schema, model } from 'mongoose'
-
-enum ROLES {
-  ADMIN = 'ADMIN',
-  EMPLOYEE = 'EMPLOYEE'
-}
-
-interface Employee {
-  name: string
-  phone: number
-  email: string
-  role: ROLES
-}
+import { Employee } from './Employee.model'
 
 export interface User {
   _id?: string
@@ -91,27 +80,7 @@ const userSchema = new Schema<User>(
       type: Object,
       required: false
     },
-    employees: [
-      {
-        name: {
-          type: String,
-          required: true
-        },
-        phone: {
-          type: Number,
-          required: true
-        },
-        email: {
-          type: String,
-          required: true
-        },
-        role: {
-          type: String,
-          required: true,
-          enum: Object.values(ROLES)
-        }
-      }
-    ]
+    employees: [{ type: Schema.Types.ObjectId, ref: 'Employee' }]
   },
   {
     timestamps: true
