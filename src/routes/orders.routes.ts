@@ -24,7 +24,6 @@ router.post(
     const {
       products,
       totalValue,
-      deliver,
       clientName,
       clientAddress,
       clientId,
@@ -40,7 +39,6 @@ router.post(
         user: userId,
         products,
         totalValue,
-        deliver,
         clientName,
         clientAddress,
         clientId,
@@ -79,6 +77,11 @@ router.post(
         })
       } else {
         await ClientModel.findByIdAndUpdate(client._id, {
+          name: clientName,
+          address: clientAddress,
+          dni: clientId,
+          phone: clientTelephone,
+          email: clientEmail,
           $push: { orders: order._id, rentedProducts, boughtProducts }
         })
       }

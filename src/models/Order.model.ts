@@ -6,6 +6,8 @@ export interface OrderProduct {
   product: Product
   name: string
   quantity: string
+  price: number
+  deliver: Date
   deposit?: number
   valuePerDay?: number
   return?: Date
@@ -17,7 +19,6 @@ export interface Order {
   user: User
   products: OrderProduct[]
   totalValue: number
-  deliver: Date
   termsAccepted: boolean
   clientName: string
   clientAddress: string
@@ -51,6 +52,15 @@ const orderSchema = new Schema<Order>(
           type: Number,
           required: true
         },
+        price: {
+          type: Number,
+          required: true
+        },
+        deliver: {
+          type: Date,
+          default: Date.now,
+          required: true
+        },
         valuePerDay: {
           type: Number
         },
@@ -65,11 +75,6 @@ const orderSchema = new Schema<Order>(
         }
       }
     ],
-    deliver: {
-      type: Date,
-      default: Date.now,
-      required: true
-    },
     totalValue: {
       type: Number,
       required: true
